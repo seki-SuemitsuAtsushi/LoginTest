@@ -8,12 +8,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private EmployeeService employeeService;
+	
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -28,13 +32,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .logout()
                 .permitAll();
     }
+    
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
     	String password = passwordEncoder().encode("password");
         auth
-            .inMemoryAuthentication()
-                .withUser("user").password(password).roles("USER"); // sets up an in-memory user store with a single user.
+        .userDetailsService(employeeService)
+        .passwordEncoder(passwordEncoder());
+//            .inMemoryAuthentication()
+//                .withUser("user").password(password).roles("USER"); // sets up an in-memory user store with a single user.
     }
     
     @Bean
